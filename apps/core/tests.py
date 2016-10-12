@@ -29,11 +29,9 @@ class TestPaid(TestCase):
             response = client.connect_step(account_type, 'tomato')
             self.assertEqual(response.status_code, 200)
             response = client.connect_get()
-            accounts = response.json()["accounts"]
-            transactions = response.json()["transactions"]
-            for account in accounts:
+            for account in response.json()["accounts"]:
                 process_account_creation(account)
-            for transaction in transactions:
+            for transaction in response.json()["transactions"]:
                 process_transaction(transaction)
             print Account.objects.values_list('_id', 'pend_transfer')
         except plaid_errors.UnauthorizedError:
@@ -42,8 +40,18 @@ class TestPaid(TestCase):
 
 class TestStripe(TestCase):
     def test_connection(self):
-        print stripe.Charge.retrieve(
-          "ch_190wZVHXVG5gpinqOcGu0Uvw", expand=['customer']
-        )
-        print stripe.Customer.list(limit=3)
-        print stripe.Balance.retrieve()
+        # customer = stripe.Customer.create(description="test customer")
+        # print 'created customer, id - %s' % customer['id']
+        # try:
+            print stripe.Card.create(
+              type='bitcoin',
+              amount=1000,
+              currency='usd',
+              owner={
+                "email":'payinguser+fill_now@example.com'
+              }
+            )
+        # except:
+        #     pass
+        # customer.delete()
+        # print 'deleted customer'
